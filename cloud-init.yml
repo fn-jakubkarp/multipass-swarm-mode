@@ -1,0 +1,14 @@
+#cloud-config
+echo "TEST"
+# package_update: true
+# package_upgrade: true
+
+# users:
+#   - default
+#   - name: ubuntu
+#     sudo: ALL=(ALL) NOPASSWD:ALL
+#     ssh_authorized_keys:
+#       - <PASTE_YOUR_PUBLIC_KEY_HERE>
+
+# packages:
+#   - python3
