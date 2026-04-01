@@ -1,28 +1,33 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+source "$SCRIPT_DIR/config.sh"
 
-MANAGER="swarm-manager"
-WORKERS=("swarm-worker-1" "swarm-worker-2" "swarm-worker-3")
+INVENTORY="./ansible/hosts.ini"
 
-echo "--- Spinning up instances ---"
-multipass launch -n "$MANAGER" --cloud-init docker-init.yaml
-
-for WORKER in "${WORKERS[@]}"; do
-    multipass launch -n "$WORKER" --cloud-init docker-init.yaml
-done
-
-echo "--- Generating hosts.ini ---"
+echo "--- Generating $INVENTORY ---"
 
 MANAGER_IP=$(multipass info "$MANAGER" | grep IPv4 | awk '{print $2}')
-echo "[managers]" > hosts.ini
-echo "$MANAGER_IP ansible_user=ubuntu" >> hosts.ini
 
-echo -e "\n[workers]" >> hosts.ini
+cat > "$INVENTORY" <<EOF
+[managers]
+$MANAGER ansible_host=$MANAGER_IP ansible_user=ubuntu
+
+[workers]
+EOF
+
 for WORKER in "${WORKERS[@]}"; do
-    W_IP=$(multipass info "$WORKER" | grep IPv4 | awk '{print $2}')
-    echo "$W_IP ansible_user=ubuntu" >> hosts.ini
+    WORKER_IP=$(multipass info "$WORKER" | grep IPv4 | awk '{print $2}')
+    echo "$WORKER ansible_host=$WORKER_IP ansible_user=ubuntu" >> "$INVENTORY"
 done
 
-echo "--- Running Ansible ---"
-ansible-playbook -i hosts.ini configure-swarm.yml
+cat >> "$INVENTORY" <<EOF
+
+[swarm:children]
+managers
+workers
+EOF
+
+echo "--- Inventory written ---"
+cat "$INVENTORY"
