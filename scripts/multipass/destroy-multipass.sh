@@ -1,11 +1,20 @@
 #!/usr/bin/env bash
+set -euo pipefail
 
-multipass delete --all
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+source "$SCRIPT_DIR/../config.sh"
+
+echo "--- Destroying swarm VMs ---"
+for VM in "${ALL_VMS[@]}"; do
+    if multipass list | grep -q "$VM"; then
+        echo "  Deleting $VM..."
+        multipass delete "$VM"
+    else
+        echo "  $VM not found, skipping..."
+    fi
+done
+
+echo "Purging deleted instances..."
 multipass purge
 
-sudo launchctl unload /Library/LaunchDaemons/com.canonical.multipassd.plist
-
-sudo rm -rf /var/root/Library/Application\ Support/multipassd
-sudo rm -rf /var/root/Library/Caches/multipassd
-
-rm -rf ~/Library/Application\ Support/multipass
+echo "Done."
