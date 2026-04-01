@@ -1,7 +1,6 @@
-#cloud-config
-echo "TEST"
-# package_update: true
-# package_upgrade: true
+# cloud-config
+package_update: true
+package_upgrade: true
 
 # users:
 #   - default
@@ -10,5 +9,6 @@ echo "TEST"
 #     ssh_authorized_keys:
 #       - <PASTE_YOUR_PUBLIC_KEY_HERE>
 
-# packages:
-#   - python3
+packages:
+  - git
+  - python3
