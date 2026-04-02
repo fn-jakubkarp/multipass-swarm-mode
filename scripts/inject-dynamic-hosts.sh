@@ -8,7 +8,7 @@ INVENTORY="./ansible/hosts.ini"
 
 echo "--- Generating $INVENTORY ---"
 
-MANAGER_IP=$(multipass info "$MANAGER" | grep IPv4 | awk '{print $2}')
+MANAGER_IP=$(multipass info "$MANAGER" | grep IPv4 | awk '{print $2}' | tr -d '\r')
 
 cat > "$INVENTORY" <<EOF
 [managers]
@@ -18,7 +18,7 @@ $MANAGER ansible_host=$MANAGER_IP ansible_user=ubuntu
 EOF
 
 for WORKER in "${WORKERS[@]}"; do
-    WORKER_IP=$(multipass info "$WORKER" | grep IPv4 | awk '{print $2}')
+    WORKER_IP=$(multipass info "$WORKER" | grep IPv4 | awk '{print $2}' | tr -d '\r')
     echo "$WORKER ansible_host=$WORKER_IP ansible_user=ubuntu" >> "$INVENTORY"
 done
 
