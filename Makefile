@@ -6,7 +6,7 @@ help: ## Show help menu
 elevate-permissions: ## Elevate permission for script files
 	@echo "Preparing scripts in ./scripts/..."
 # Ensure Windows line endings are removed
-	@find ./scripts -name "*.sh" -exec perl -pi -e 's/\r$$//' {} + || true
+# @find ./scripts -name "*.sh" -exec perl -pi -e 's/\r$$//' {} + || true
 	@chmod -R 755 ./scripts/
 
 create-multipass: elevate-permissions ## Launch Multipass VMs for the swarm
