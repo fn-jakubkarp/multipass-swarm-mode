@@ -10,4 +10,4 @@ CLOUD_INIT="./cloud-init.yml"
 
 VM_CPUS=1
 VM_MEM="1G"
-VM_DISK="2G"
+VM_DISK="4G"
