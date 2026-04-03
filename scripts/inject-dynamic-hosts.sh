@@ -8,14 +8,18 @@ INVENTORY="./ansible/hosts.ini"
 
 echo "--- Generating $INVENTORY ---"
 
-MANAGER_IP=$(multipass info "$MANAGER" | grep IPv4 | awk '{print $2}' | tr -d '\r')
-
+# 1. Create the file and write the initial manager header
 cat > "$INVENTORY" <<EOF
 [managers]
-$MANAGER ansible_host=$MANAGER_IP ansible_user=ubuntu
-
-[workers]
 EOF
+
+# 2. Run the loop OUTSIDE the cat command
+for MANAGER in "${MANAGERS[@]}"; do
+    MANAGER_IP=$(multipass info "$MANAGER" | grep IPv4 | awk '{print $2}' | tr -d '\r')
+    echo "$MANAGER ansible_host=$MANAGER_IP ansible_user=ubuntu" >> "$INVENTORY"
+done
+
+echo -e "\n[workers]" >> "$INVENTORY"
 
 for WORKER in "${WORKERS[@]}"; do
     WORKER_IP=$(multipass info "$WORKER" | grep IPv4 | awk '{print $2}' | tr -d '\r')
