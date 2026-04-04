@@ -1,0 +1,5 @@
+CREATE TABLE counter (
+    id SERIAL PRIMARY KEY,
+    clicks INTEGER NOT NULL DEFAULT 0
+);
+INSERT INTO counter (clicks) VALUES (0);

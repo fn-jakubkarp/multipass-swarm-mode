@@ -1,0 +1,36 @@
+services:
+  backend:
+    build: .
+    environment:
+      - DATABASE_URL=${DATABASE_URL}
+    env_file:
+      - .env
+  db:
+    image: postgres:18
+
+
+
+  prometheus:
+    image: prom/prometheus
+    container_name: prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+    ports:
+      - 9090:9090
+    restart: unless-stopped
+    volumes:
+      - ./prometheus:/etc/prometheus
+      - prom_data:/prometheus
+  grafana:
+    image: grafana/grafana
+    container_name: grafana
+    ports:
+      - 3000:3000
+    restart: unless-stopped
+    environment:
+      - GF_SECURITY_ADMIN_USER=${GF_SECURITY_ADMIN_USER:-admin}
+      - GF_SECURITY_ADMIN_PASSWORD=${GF_SECURITY_ADMIN_PASSWORD:-admin}
+    volumes:
+      - ./grafana:/etc/grafana/provisioning/datasources
+volumes: # TODO: bind mount for swarm
+  prom_data:

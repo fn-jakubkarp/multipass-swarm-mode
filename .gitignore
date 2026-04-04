@@ -4,6 +4,7 @@ ansible/hosts.ini
 # Backend
 __pycache__/
 .venv/
+.env
 
 
 # Frontend
