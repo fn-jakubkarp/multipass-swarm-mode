@@ -39,14 +39,52 @@
         {{ hostvars[groups['managers'][0]].ansible_host }}:2377
       when: swarm_status.stdout != "active"
 
-- name: Configure Swarm Networks
+- name: Configure Swarm Networks, Registry and App
   hosts: managers
   become: true
   run_once: true
   tasks:
     - name: Check if overlay network exists
-      command: docker network ls --filter name=my_swarm_network
-      when: network_status.stdout == ""
+      command: docker network ls --filter name=traefik-public -q
+      register: network_status
+      changed_when: false
 
     - name: Create overlay network
-      command: docker network create --driver overlay my_swarm_network
+      command: docker network create --driver overlay traefik-public
+      when: network_status.stdout == ""
+
+    - name: Check if local registry exists
+      command: docker service ls --filter name=registry -q
+      register: registry_status
+      changed_when: false
+
+    - name: Create local Docker Registry
+      command: >-
+        docker service create --name registry 
+        --publish published=5000,target=5000 
+        registry:2
+      when: registry_status.stdout == ""
+
+    - name: Copy project files to Manager VM
+      copy:
+        src: ../
+        dest: /opt/myapp/
+      
+    - name: Generate unique version tag
+      set_fact:
+        app_version: "v{{ ansible_date_time.epoch }}"
+      
+    - name: Build backend image
+      command: docker build -t 127.0.0.1:5000/backend:{{ app_version }} /opt/myapp/backend
+
+    - name: Push backend image to local registry
+      command: docker push 127.0.0.1:5000/backend:{{ app_version }}
+
+    - name: Build frontend image
+      command: docker build -t 127.0.0.1:5000/frontend:{{ app_version }} /opt/myapp/frontend
+
+    - name: Push frontend image to local registry
+      command: docker push 127.0.0.1:5000/frontend:{{ app_version }}
+
+    - name: Deploy Swarm Stack with new version
+      shell: "APP_VERSION={{ app_version }} docker stack deploy -c /opt/myapp/docker-compose.yml my_app"
