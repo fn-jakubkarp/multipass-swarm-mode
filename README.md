@@ -1,5 +1,7 @@
 # multipass-swarm-mode
 
+[![Build and Publish to GHCR](https://github.com/fn-jakubkarp/multipass-swarm-mode/actions/workflows/publish-docker.yml/badge.svg)](https://github.com/fn-jakubkarp/multipass-swarm-mode/actions/workflows/publish-docker.yml)
+
 A full-stack application running on a local **Docker Swarm** cluster of **Multipass VMs**. The application itself is intentionally minimal — the focus is on the infrastructure: how a swarm is formed, how images are distributed, how traffic is routed, and how services discover each other at runtime.
 
 ---
