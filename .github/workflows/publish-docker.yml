@@ -52,3 +52,12 @@ jobs:
                 type=ref,event=branch
                 type=sha,format=short
                 type=semver,pattern={{version}}
+
+      - name: Build and push ${{ matrix.component }}
+        uses: docker/build-push-action@v6
+        with:
+          context: ${{ github.workspace }}/app/${{ matrix.component }}
+          file: ${{ github.workspace }}/app/${{ matrix.component }}/Dockerfile
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
